@@ -22,188 +22,156 @@
       </style>
    </head>
    <body>
-      <div class='container-fluid'>
-         <div class='row'>
-            <div class='col-md'>
-               <div class='well define_height'>
-                  <form id="distance_form" method="post" action=""> <!-- Action verwijst naar dezelfde pagina -->
-                     <div class="form-group">
-                        <label for="">Uw naam + voornaam</label>
-                        <input class="form-control" type="text" placeholder="Uw naam + voornaam" name="name" required>
-                     </div>
-                     <div class="form-group">
-                        <label for="">Uw e-mailadres</label>
-                        <input class="form-control" type="email" name="email" placeholder="steven@voorbeeld.be" required>
-                     </div>
-                     <div class="form-group">
-                        <label for="">Uw telefoonnummer</label>
-                        <input class="form-control" type="tel" name="phone" placeholder="+32" required>
-                     </div>
-                     <div class="form-group">
-                        <label>Adres van ophaling</label>
-                        <input class="form-control ophaling" id="from_places" name="from_places" placeholder="Geef hier je adres in" required/>                        
-                        <input id="origin" name="origin" type="hidden"/>
-                        <a onclick="getCurrentPosition()">Set Current Location</a>
-                     </div>
-                     <div id="stopover_container"></div>
-                     <button type="button" id="add_stopover_btn" class="btn btn-primary">Voeg een tussenstop toe</button>
-                     <div class="form-group">
-                        <label>Eind bestemming</label>
-                        <input class="form-control" id="to_places" name="to_places" placeholder="Geef hier je adres in" required/>
-                        <input id="destination" name="destination" type="hidden"/>
-                     </div>
-                     <div class="form-group">
-                        <label for="">Aantal personen</label>
-                        <input class="form-control" type="number" min="1" max="7" name="persons" value="1">
-                     </div>
-                     <div class="form-group">
-                        <label for="">Datum</label>
-                        <input class="form-control" type="date" name="date" required>
-                     </div>
-                     <div class="form-group">
-                        <label for="">Aanvang uur ophaling</label>
-                        <input class="form-control" type="time" name="time" required>
-                     </div>
-                     <div class="form-group">
-                        <label>Travel Mode</label>
-                        <select class="form-control" id="travel_mode" name="travel_mode">
-                           <option value="DRIVING">Driving</option>
-                        </select>
-                     </div>
-                     <input class="btn btn-primary" type="submit" name="submit" value="Verstuur aanvraag" style="background: #8142b1; width: 100%; border: 0px;" />
-                  </form>
-                  <div class="row" style="padding-top: 20px;">
-                     <div class="container">
-                        <p id="in_kilo"></p>
-                        <p id="in_mile"></p>
-                        <p id="duration_text"></p>
-                     </div>
-                  </div>
-               </div>
-            </div>
-         </div>
-      </div>
-
-      <script>
-         document.addEventListener("DOMContentLoaded", function() {
-            var origin, destination, map;
-            var stopover = []; // Array to store multiple stopover addresses
-
-            // add input listeners
-            google.maps.event.addDomListener(window, 'load', function (listener) {
-               setDestination();
-               initMap();
-            });
-
-            // init or load map
-            function initMap() {
-               var myLatLng = {
-                  lat: 50.887691,
-                  lng: 4.470130
-               };
-               map = new google.maps.Map(document.getElementById('map'), {zoom: 10, center: myLatLng});
-            }
-
-            function setDestination() {
-               var from_places = new google.maps.places.Autocomplete(document.getElementById('from_places'));
-               var to_places = new google.maps.places.Autocomplete(document.getElementById('to_places'));
-               var add_stopover_btn = document.getElementById('add_stopover_btn');
-
-               google.maps.event.addListener(from_places, 'place_changed', function () {
-                  var from_place = from_places.getPlace();
-                  var from_address = from_place.formatted_address;
-                  $('#origin').val(from_address);
-               });
-
-               google.maps.event.addListener(to_places, 'place_changed', function () {
-                  var to_place = to_places.getPlace();
-                  var to_address = to_place.formatted_address;
-                  $('#destination').val(to_address);
-               });
-
-               // Event listener to add stopover
-               add_stopover_btn.addEventListener('click', function () {
-                  var stopover_container = document.getElementById('stopover_container');
-                  var new_stopover_input = document.createElement('input');
-                  new_stopover_input.classList.add('form-control', 'between_places');
-                  new_stopover_input.setAttribute('placeholder', 'Enter stopover address');
-                  stopover_container.appendChild(new_stopover_input);
-
-                  var new_stopover_autocomplete = new google.maps.places.Autocomplete(new_stopover_input);
-                  google.maps.event.addListener(new_stopover_autocomplete, 'place_changed', function () {
-                     var between_place = new_stopover_autocomplete.getPlace();
-                     if (between_place && between_place.formatted_address) {
-                        stopover.push(between_place.formatted_address);
-                     }
-                  });
-               });
-            }
-         });
-
-         // get current Position
-         function getCurrentPosition() {
-            if (navigator.geolocation) {
-               navigator.geolocation.getCurrentPosition(setCurrentPosition);
-            } else {
-               alert("Geolocation is not supported by this browser.")
-            }
-         }
-
-         // get formatted address based on current position and set it to input
-         function setCurrentPosition(pos) {
-            var geocoder = new google.maps.Geocoder();
-            var latlng = {lat: parseFloat(pos.coords.latitude), lng: parseFloat(pos.coords.longitude)};
-            geocoder.geocode({'location': latlng}, function (responses) {
-               if (responses && responses.length > 0) {
-                  $("#origin").val(responses[1].formatted_address);
-                  $("#from_places").val(responses[1].formatted_address);
-               } else {
-                  alert("Cannot determine address at this location.")
-               }
-            });
-         }
-      </script>
-
       <?php
-         if ($_SERVER["REQUEST_METHOD"] == "POST") {
-            // Valideer en schoon de invoer
-            $name = htmlspecialchars($_POST['name']);
-            $email = htmlspecialchars($_POST['email']);
-            $phone = htmlspecialchars($_POST['phone']);
-            $from = htmlspecialchars($_POST['from_places']);
-            $to = htmlspecialchars($_POST['to_places']);
-            $persons = intval($_POST['persons']);
-            $date = htmlspecialchars($_POST['date']);
-            $time = htmlspecialchars($_POST['time']);
-            $travel_mode = htmlspecialchars($_POST['travel_mode']);
+   // Voeg de shortcode toe voor het formulier
+add_shortcode('offerte_formulier', 'render_offerte_formulier');
 
-            // Onderwerp en bericht opstellen
-            $subject = "Offerte Aanvraag";
-            $message = "Naam: " . $name . "\n";
-            $message .= "E-mailadres: " . $email . "\n";
-            $message .= "Telefoonnummer: " . $phone . "\n";
-            $message .= "Adres van ophaling: " . $from . "\n";
-            $message .= "Eind bestemming: " . $to . "\n";
-            $message .= "Aantal personen: " . $persons . "\n";
-            $message .= "Datum: " . $date . "\n";
-            $message .= "Aanvang uur ophaling: " . $time . "\n";
-            $message .= "Reismodus: " . $travel_mode . "\n";
-
-            // Het e-mailadres waarnaar de aanvraag wordt verzonden
-            $to_email = "lucas.kameleon@gmail.com";
-
-            // Headers instellen voor de e-mail
-            $headers = "From: noreply@jouwdomein.com\r\n";
-            $headers .= "Reply-To: " . $email . "\r\n";
-            $headers .= "X-Mailer: PHP/" . phpversion();
-
-            // E-mail verzenden
-            if (mail($to_email, $subject, $message, $headers)) {
-               echo "<p style='color: green;'>Bedankt! Uw aanvraag is succesvol verzonden.</p>";
-            } else {
-               echo "<p style='color: red;'>Er is een probleem opgetreden bij het versturen van uw aanvraag. Probeer het later opnieuw.</p>";
+function render_offerte_formulier() {
+    ob_start();
+    ?>
+    <form id="distance_form" method="post" action="">
+        <div class="form-group">
+            <label for="name">Uw naam + voornaam</label>
+            <input class="form-control" type="text" name="name" placeholder="Uw naam + voornaam" required>
+        </div>
+        <div class="form-group">
+            <label for="email">Uw e-mailadres</label>
+            <input class="form-control" type="email" name="email" placeholder="steven@voorbeeld.be" required>
+        </div>
+        <div class="form-group">
+            <label for="phone">Uw telefoonnummer</label>
+            <input class="form-control" type="tel" name="phone" placeholder="+32" required>
+        </div>
+        <div class="form-group">
+            <label>Adres van ophaling</label>
+            <input class="form-control" id="from_places" name="from_places" placeholder="Geef hier je adres in" required>
+            <input type="hidden" id="origin" name="origin">
+            <a href="javascript:void(0);" onclick="getCurrentPosition()">Gebruik huidige locatie</a>
+        </div>
+        <div id="stopover_container"></div>
+        <button type="button" id="add_stopover_btn" class="btn btn-primary">Voeg een tussenstop toe</button>
+        <div class="form-group">
+            <label>Eind bestemming</label>
+            <input class="form-control" id="to_places" name="to_places" placeholder="Geef hier je adres in" required>
+            <input type="hidden" id="destination" name="destination">
+        </div>
+        <div class="form-group">
+            <label for="persons">Aantal personen</label>
+            <input class="form-control" type="number" name="persons" min="1" max="7" value="1" required>
+        </div>
+        <div class="form-group">
+            <label for="date">Datum</label>
+            <input class="form-control" type="date" name="date" required>
+        </div>
+        <div class="form-group">
+            <label for="time">Aanvang uur ophaling</label>
+            <input class="form-control" type="time" name="time" required>
+        </div>
+        <div class="form-group">
+            <label>Travel Mode</label>
+            <select class="form-control" name="travel_mode" required>
+                <option value="DRIVING">Driving</option>
+            </select>
+        </div>
+        <input type="submit" class="btn btn-primary" value="Verstuur aanvraag">
+    </form>
+    <div id="result">
+        <p id="in_kilo"></p>
+        <p id="in_mile"></p>
+        <p id="duration_text"></p>
+    </div>
+    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=places"></script>
+    <script>
+        // JavaScript: Google API en berekeningen
+        document.addEventListener("DOMContentLoaded", function () {
+            var stopovers = [];
+            function initializeAutocomplete() {
+                new google.maps.places.Autocomplete(document.getElementById("from_places"));
+                new google.maps.places.Autocomplete(document.getElementById("to_places"));
             }
-         }
-      ?>
+            initializeAutocomplete();
+
+            document.getElementById("add_stopover_btn").addEventListener("click", function () {
+                var container = document.getElementById("stopover_container");
+                var input = document.createElement("input");
+                input.classList.add("form-control");
+                input.placeholder = "Geef tussenstop in";
+                container.appendChild(input);
+                stopovers.push(input);
+            });
+        });
+
+        function getCurrentPosition() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function (position) {
+                    var geocoder = new google.maps.Geocoder();
+                    var latlng = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    };
+                    geocoder.geocode({ location: latlng }, function (results, status) {
+                        if (status === "OK" && results[0]) {
+                            document.getElementById("from_places").value = results[0].formatted_address;
+                        }
+                    });
+                });
+            } else {
+                alert("Geolocatie wordt niet ondersteund.");
+            }
+        }
+    </script>
+    <?php
+    return ob_get_clean();
+}
+
+// Verwerk het formulier en stuur een e-mail met PHPMailer
+add_action('init', 'verwerk_offerte_formulier');
+
+function verwerk_offerte_formulier() {
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['name'])) {
+        // Informatie verzamelen
+        $name = sanitize_text_field($_POST['name']);
+        $email = sanitize_email($_POST['email']);
+        $phone = sanitize_text_field($_POST['phone']);
+        $from = sanitize_text_field($_POST['from_places']);
+        $to = sanitize_text_field($_POST['to_places']);
+        $persons = intval($_POST['persons']);
+        $date = sanitize_text_field($_POST['date']);
+        $time = sanitize_text_field($_POST['time']);
+        $travel_mode = sanitize_text_field($_POST['travel_mode']);
+
+        // Bericht opstellen
+        $subject = "Nieuwe offerteaanvraag";
+        $message = "Naam: $name\nE-mail: $email\nTelefoon: $phone\nVan: $from\nNaar: $to\n";
+        $message .= "Aantal personen: $persons\nDatum: $date\nTijd: $time\nReismodus: $travel_mode\n";
+
+        // PHPMailer gebruiken voor SMTP
+        $mail = new PHPMailer\PHPMailer\PHPMailer();
+        try {
+            $mail->isSMTP();
+            $mail->Host = 'smtp.gmail.com';
+            $mail->SMTPAuth = true;
+            $mail->Username = 'lucas.kameleon@gmail.com';
+            $mail->Password = 'hSl!5242@-';
+            $mail->SMTPSecure = 'tls';
+            $mail->Port = 587;
+
+            $mail->setFrom('lucas.kameleon@gmail.com', 'Lucas');
+            $mail->addAddress('heymanslucas@outlook.com');
+
+            $mail->Subject = $subject;
+            $mail->Body = $message;
+
+            if ($mail->send()) {
+                echo '<p style="color: green;">E-mail succesvol verzonden.</p>';
+            } else {
+                echo '<p style="color: red;">E-mail verzenden mislukt.</p>';
+            }
+        } catch (Exception $e) {
+            echo '<p style="color: red;">Error: ' . $mail->ErrorInfo . '</p>';
+        }
+    }
+}
+?>
    </body>
 </html>
