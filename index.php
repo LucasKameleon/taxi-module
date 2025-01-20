@@ -4,7 +4,7 @@
       <title>Find Location</title>
       <meta charset='utf-8' />
       <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-      <script defer src="https://maps.googleapis.com/maps/api/js?libraries=places&key=AIzaSyB0gHMQbdBqYTf8dXl5MhiAr0MTt-i_TyE" type="text/javascript"></script>
+      <script defer src="https://maps.googleapis.com/maps/api/js?libraries=places&key=API_KEY" type="text/javascript"></script>
       <link rel="shortcut icon" href="map.png" type="image/x-icon">
       <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
       <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
